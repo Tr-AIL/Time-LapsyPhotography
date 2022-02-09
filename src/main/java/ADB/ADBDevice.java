@@ -58,17 +58,13 @@ public class ADBDevice {
         }
 
         InputStream ADBInputStream = ADBProcess.getInputStream();
-        int totalBytes;
-        while (true) {
-            try {
-                if (ADBInputStream.available() != -1) {
-                    totalBytes = ADBInputStream.available();
-                    break;
-                }
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(null, "程序发生逻辑错误，请联系开发者提交反馈\n" + e.getMessage());
-                System.exit(1);
-            }
+        int totalBytes = 0;
+        try {
+            while (ADBInputStream.available() == -1) {}
+            totalBytes = ADBInputStream.available();
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "程序发生逻辑错误，请联系开发者提交反馈\n" + e.getMessage());
+            System.exit(1);
         }
 
         byte[] bytes = new byte[totalBytes];
@@ -83,6 +79,11 @@ public class ADBDevice {
             devicesSB.append(b);
         }
         String devices = devicesSB.toString();
-        return null;
+
+        return new ADBDevice[]{new ADBDevice(devices)};
+    }
+
+    public String toString() {
+        return deviceID;
     }
 }
