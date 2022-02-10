@@ -5,6 +5,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 public class ADBDevice {
     private final String deviceID;
@@ -58,29 +59,32 @@ public class ADBDevice {
         }
 
         InputStream ADBInputStream = ADBProcess.getInputStream();
-        int totalBytes = 0;
+        StringBuilder originalSB = new StringBuilder();
         try {
-            while (ADBInputStream.available() == -1) {}
-            totalBytes = ADBInputStream.available();
+            int b;
+            while((b = ADBInputStream.read()) == -1) {}
+            originalSB.append((char) b);
+            while((b = ADBInputStream.read()) != -1) { originalSB.append((char) b); }
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "程序发生逻辑错误，请联系开发者提交反馈\n" + e.getMessage());
+            JOptionPane.showMessageDialog(null, "发生IO错误，请联系开发者提交反馈\n" + e.getMessage());
             System.exit(1);
         }
-
-        byte[] bytes = new byte[totalBytes];
-        try {
-            ADBInputStream.read(bytes);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "发生I/O错误，请联系开发者提交反馈\n" + e.getMessage());
+        String originalString = originalSB.toString();
+        ArrayList<ADBDevice> devices = new ArrayList<>();
+        for(int i = 0; i < originalString.length(); i++) {
+            if(originalString.charAt(i)=='\n') {
+                for(int j = i; j < originalString.length(); j++) {
+                    if(originalString.charAt(j) == '\t') {
+                        devices.add(new ADBDevice(originalString.substring(i+1,j)));
+                        i = j;
+                        break;
+                    }
+                }
+            }
         }
-
-        StringBuilder devicesSB = new StringBuilder();
-        for(byte b : bytes) {
-            devicesSB.append(b);
-        }
-        String devices = devicesSB.toString();
-
-        return new ADBDevice[]{new ADBDevice(devices)};
+        ADBDevice[] result = new ADBDevice[devices.size()];
+        for (int i = 0; i < devices.size(); i++) result[i] = devices.get(i);
+        return result;
     }
 
     public String toString() {

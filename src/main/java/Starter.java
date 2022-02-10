@@ -3,14 +3,12 @@ import ADB.ADBDevice;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.util.Arrays;
 
 public class Starter {
     public static String path = System.getProperty("user.dir");
 
     public static void main(String[] args) throws IOException {
-        System.out.println(ADBDevice.getADBDevices()[0].toString());
-        /*EventQueue.invokeLater(() -> {
+        EventQueue.invokeLater(() -> {
             TerminalFrame mainFrame = new TerminalFrame();
             Toolkit toolkit = Toolkit.getDefaultToolkit();
             int width = 800;
@@ -22,7 +20,7 @@ public class Starter {
             mainFrame.setTitle("Photography Control Terminal");
             mainFrame.setResizable(false);
             mainFrame.setVisible(true);
-        });*/
+        });
     }
 }
 
