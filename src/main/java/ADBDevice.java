@@ -57,7 +57,7 @@ public class ADBDevice {
         StringBuilder originalSB = new StringBuilder();
         try {
             int b;
-            while(true) { if((b = ADBInputStream.read()) == -1) break; }
+            while(true) { if((b = ADBInputStream.read()) != -1) break; }
             originalSB.append((char) b);
             while((b = ADBInputStream.read()) != -1) { originalSB.append((char) b); }
         } catch (IOException e) {
@@ -65,7 +65,7 @@ public class ADBDevice {
             System.exit(1);
         }
         String result = originalSB.toString();
-        return new Dimension(Integer.parseInt(result.substring(16, result.indexOf('x'))),
+        return new Dimension(Integer.parseInt(result.substring(15, result.indexOf('x'))),
                 Integer.parseInt(result.substring(result.indexOf('x')+1, result.length()-2)));
     }
 

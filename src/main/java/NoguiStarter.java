@@ -11,6 +11,7 @@ public class NoguiStarter {
         }
         Scanner in = new Scanner(System.in);
         ADBDevice targetDevice;
+        long shutterTime;
         int periodTime;
         int totalTime;
         int frameRate;
@@ -36,7 +37,18 @@ public class NoguiStarter {
         else targetDevice = devices[0];
         AutomaticShooter shooter = new AutomaticShooter(targetDevice);
 
-        System.out.println("请输入拍摄间隔（单位：秒，不建议小于60）：");
+        System.out.println("请输入快门时间（单位：毫秒）：");
+        while(true) {
+            try{
+                shutterTime = in.nextInt();
+                break;
+            } catch (InputMismatchException e) {
+                System.out.println("输入类型错误！请重新输入：");
+                in.nextLine();
+            }
+        }
+
+        System.out.println("请输入拍摄间隔（单位：秒，不要小于快门时间）：");
         while(true) {
             try{
                 periodTime = in.nextInt();
@@ -83,7 +95,7 @@ public class NoguiStarter {
             else System.out.println("请重新输入！");
         }
 
-        if(noCameraSleep) shooter.startWithoutCameraSleep(periodTime, totalTime, frameRate);
-        else shooter.start(periodTime, totalTime, frameRate);
+        if(noCameraSleep) shooter.startWithoutCameraSleep(shutterTime, periodTime, totalTime, frameRate);
+        else shooter.start(shutterTime, periodTime, totalTime, frameRate);
     }
 }
