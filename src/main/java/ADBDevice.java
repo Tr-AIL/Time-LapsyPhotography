@@ -13,12 +13,12 @@ public class ADBDevice {
     }
 
     public String adbCommand(String cmd) throws IOException {
-        Process ADBProcess = Runtime.getRuntime().exec(new String[]{"adb " + cmd});
+        Process ADBProcess = Runtime.getRuntime().exec("adb -s " + deviceID + " " + cmd);
         InputStream ADBInputStream = ADBProcess.getInputStream();
         StringBuilder originalSB = new StringBuilder();
         try {
             int b;
-            while((b = ADBInputStream.read()) == -1) {}
+            while(true) { if((b = ADBInputStream.read()) != -1) break; }
             originalSB.append((char) b);
             while((b = ADBInputStream.read()) != -1) { originalSB.append((char) b); }
         } catch (IOException e) {
@@ -35,7 +35,7 @@ public class ADBDevice {
         StringBuilder originalSB = new StringBuilder();
         try {
             int b;
-            while((b = ADBInputStream.read()) == -1) {}
+            while(true) { if((b = ADBInputStream.read()) != -1) break; }
             originalSB.append((char) b);
             while((b = ADBInputStream.read()) != -1) { originalSB.append((char) b); }
         } catch (IOException e) {
@@ -57,7 +57,7 @@ public class ADBDevice {
         StringBuilder originalSB = new StringBuilder();
         try {
             int b;
-            while((b = ADBInputStream.read()) == -1) {}
+            while(true) { if((b = ADBInputStream.read()) == -1) break; }
             originalSB.append((char) b);
             while((b = ADBInputStream.read()) != -1) { originalSB.append((char) b); }
         } catch (IOException e) {
@@ -87,9 +87,9 @@ public class ADBDevice {
     public Image getCurrentScreenshot() throws IOException {
         Process ADBProcess = Runtime.getRuntime().exec(
                 new String[]{"adb", "-s", deviceID, "shell", "/system/bin/screencap", "-p", "/sdcard/screen.png"});
-        while(ADBProcess.isAlive()) {}
+        while(true) { if(!ADBProcess.isAlive()) break; }
         ADBProcess = Runtime.getRuntime().exec(new String[]{"adb", "-s", deviceID, "pull", "-a", "/sdcard/screen.png"});
-        while(ADBProcess.isAlive()) {}
+        while(true) { if(!ADBProcess.isAlive()) break; }
         Runtime.getRuntime().exec(new String[]{"adb", "-s", deviceID, "shell", "rm", "-f", "/sdcard/screen.png"});
         Image screen = Toolkit.getDefaultToolkit().createImage("screen.png");
         new File("screen.png").delete();
@@ -143,7 +143,7 @@ public class ADBDevice {
         StringBuilder originalSB = new StringBuilder();
         try {
             int b;
-            while((b = ADBInputStream.read()) == -1) {}
+            while(true) { if((b = ADBInputStream.read()) != -1) break; }
             originalSB.append((char) b);
             while((b = ADBInputStream.read()) != -1) { originalSB.append((char) b); }
         } catch (IOException e) {
