@@ -89,8 +89,13 @@ public class AutomaticShooter {
                 System.out.println("拍摄完成，正在合成...");
                 Process ffmpeg = FFMPEGController.start(frameRate, videoQuality, videoName);
                 while(ffmpeg.isAlive()) Thread.sleep(200);
-                System.out.println("合成完毕！");
+                System.out.println("合成完毕！正在删除临时文件...");
             } catch (InterruptedException ignored) {}
+
+            for(int n = 1; n < fileCounts + 1; n++) {
+                new File("shotImages\\IMG" + n + ".jpg").delete();
+            }
+            System.out.println("删除完毕！进程已结束！");
         });
 
         shootThread.start();
