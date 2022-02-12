@@ -14,6 +14,8 @@ public class NoguiStarter {
         int periodTime;
         int totalTime;
         int frameRate;
+        int videoQuality;
+        String videoName;
         boolean noCameraSleep;
         if(devices.length != 1) {
             for (int i = 0; i < devices.length; i++) System.out.println(i + ":" + devices[i]);
@@ -58,7 +60,7 @@ public class NoguiStarter {
             }
         }
 
-        System.out.println("请输入输出视频帧率（fps）：");
+        System.out.println("请输入视频帧率：");
         while(true) {
             try{
                 frameRate = in.nextInt();
@@ -69,7 +71,22 @@ public class NoguiStarter {
             }
         }
 
-        System.out.println("部分手机在一定时间无操作后会使相机休眠，是否在相机休眠时（拍摄前2秒）唤醒？（y/n）");
+        System.out.println("请输入视频crf质量（数值越小，质量越好，编码时间越长，通常为15-25）：");
+        while(true) {
+            try{
+                videoQuality = in.nextInt();
+                break;
+            } catch (InputMismatchException e) {
+                System.out.println("输入类型错误！请重新输入：");
+                in.nextLine();
+            }
+        }
+
+        System.out.println("请输入输出视频名称（默认MP4格式，无需添加后缀）：");
+        in.nextLine();
+        videoName = in.nextLine();
+
+        System.out.println("部分手机在一定时间无操作后会使相机休眠，是否在拍摄前2秒唤醒？（y/n）");
         while(true) {
             String s = in.nextLine();
             if(Objects.equals(s, "y")) {
@@ -83,7 +100,7 @@ public class NoguiStarter {
             else System.out.println("请重新输入！");
         }
 
-        if(noCameraSleep) shooter.startWithoutCameraSleep(periodTime, totalTime, frameRate);
-        else shooter.start(periodTime, totalTime, frameRate);
+        if(noCameraSleep) shooter.startWithoutCameraSleep(periodTime, totalTime, frameRate, videoQuality, videoName);
+        else shooter.start(periodTime, totalTime, frameRate, videoQuality, videoName);
     }
 }

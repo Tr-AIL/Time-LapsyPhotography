@@ -1,11 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Scanner;
 
 public class AutomaticShooter {
     private final ADBDevice device;
@@ -19,12 +17,12 @@ public class AutomaticShooter {
         this.device = device;
     }
 
-    public void startWithoutCameraSleep(int pt, int tt, int fr) {
-        if(pt > 2) isNoCameraSleep = true;
-        start(pt, tt, fr);
+    public void startWithoutCameraSleep(int periodTime, int totalTime, int frameRate, int videoQuality, String videoRate) {
+        if(periodTime > 2) isNoCameraSleep = true;
+        start(periodTime, totalTime, frameRate, videoQuality, videoRate);
     }
 
-    public void start(int pt, int tt, int fr) {
+    public void start(int periodTime, int totalTime, int frameRate, int videoQuality, String videoName) {
         try {
             beforeString = device.adbCommand("shell ls /sdcard/DCIM/Camera/");
         } catch (IOException e) {
@@ -32,7 +30,9 @@ public class AutomaticShooter {
             throw new RuntimeException(e);
         }
 
-        fileCounts = tt / pt;
+        fileCounts = totalTime / periodTime;
+
+        System.out.println("开始拍摄...");
 
         Thread shootThread = new Thread(() -> {
             for (int i = 0; i < fileCounts; i++) {
@@ -52,18 +52,18 @@ public class AutomaticShooter {
             try {
                 screenOffTimeOut = device.getScreenOffTimeOut();
                 Dimension d = device.getScreenSize();
-                device.setScreenOffTimeOut(pt+5);
+                device.setScreenOffTimeOut(periodTime+5);
                 if(isNoCameraSleep) {
                     for (int i = 0; i < fileCounts; i++) {
                         shoot = true;
-                        Thread.sleep(1000L * pt - 2000);
+                        Thread.sleep(1000L * periodTime - 2000);
                         device.tap(d.width / 2, d.height / 2);
                         Thread.sleep(2000);
                     }
                 } else {
                     for(int i = 0; i < fileCounts; i++) {
                         shoot = true;
-                        Thread.sleep(1000L * pt);
+                        Thread.sleep(1000L * periodTime);
                     }
                 }
                 device.setScreenOffTimeOut(screenOffTimeOut);
@@ -75,15 +75,22 @@ public class AutomaticShooter {
 
         Thread totalTimeClockThread = new Thread(() -> {
             try {
-                Thread.sleep(1000L * tt);
+                Thread.sleep(1000L * totalTime);
                 while (shootThread.isAlive() && shootClockThread.isAlive()) Thread.sleep(100);
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 JOptionPane.showMessageDialog(null, "计时线程出现异常！请联系开发者提交反馈" + e.getMessage());
                 throw new RuntimeException(e);
             }
-
             pullFile();
+            File lastIMG = new File("shotImages\\IMG" + fileCounts + ".jpg");
+            try {
+                while(!lastIMG.exists()) Thread.sleep(100);
+                System.out.println("拍摄完成，正在合成...");
+                Process ffmpeg = FFMPEGController.start(frameRate, videoQuality, videoName);
+                while(ffmpeg.isAlive()) Thread.sleep(200);
+                System.out.println("合成完毕！");
+            } catch (InterruptedException ignored) {}
         });
 
         shootThread.start();
